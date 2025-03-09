@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar</title>
+    <!-- Modern fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Latest FullCalendar v6 -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            /* Light theme is default */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-tertiary: #64748b;
+            --accent-primary: #06b6d4;
+            --accent-secondary: #0891b2;
+            --border-color: #e2e8f0;
+            --event-bg-1: rgba(59, 130, 246, 0.1);
+            --event-border-1: #3b82f6;
+            --event-bg-2: rgba(139, 92, 246, 0.1);
+            --event-border-2: #8b5cf6;
+            --event-bg-3: rgba(236, 72, 153, 0.1);
+            --event-border-3: #ec4899;
+            --event-bg-4: rgba(16, 185, 129, 0.1);
+            --event-border-4: #10b981;
+            --shadow-color: rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            letter-spacing: -0.01em;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0.75rem;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--accent-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .calendar-container {
+            background-color: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 0.75rem;
+            box-shadow: 0 2px 8px var(--shadow-color);
+            overflow: hidden;
+        }
+
+        /* Override FullCalendar styles */
+        .fc {
+            --fc-page-bg-color: var(--bg-secondary);
+            --fc-border-color: var(--border-color);
+            --fc-neutral-bg-color: var(--bg-tertiary);
+            --fc-neutral-text-color: var(--text-secondary);
+            --fc-neutral-border-color: var(--border-color);
+            
+            --fc-button-bg-color: var(--bg-tertiary);
+            --fc-button-border-color: var(--border-color);
+            --fc-button-hover-bg-color: var(--accent-primary);
+            --fc-button-hover-border-color: var(--accent-primary);
+            --fc-button-active-bg-color: var(--accent-secondary);
+            --fc-button-active-border-color: var(--accent-secondary);
+            
+            --fc-event-bg-color: var(--event-bg-1);
+            --fc-event-border-color: var(--event-border-1);
+            --fc-event-text-color: var(--text-primary);
+            
+            --fc-list-event-hover-bg-color: var(--bg-tertiary);
+            
+            --fc-today-bg-color: rgba(6, 182, 212, 0.06);
+            --fc-now-indicator-color: var(--accent-primary);
+        }
+
+        .fc-theme-standard .fc-scrollgrid {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .fc-header-toolbar {
+            margin-bottom: 0.75rem !important;
+        }
+
+        .fc-toolbar-title {
+            font-size: 1rem !important;
+            font-weight: 600 !important;
+        }
+
+        .fc .fc-button {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 500;
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            transition: all 0.15s ease;
+        }
+
+        .fc .fc-button:hover {
+            background-color: var(--accent-primary);
+        }
+
+        .fc .fc-button-primary:not(:disabled).fc-button-active, 
+        .fc .fc-button-primary:not(:disabled):active {
+            background-color: var(--accent-secondary);
+        }
+
+        .fc-daygrid-day-number,
+        .fc-col-header-cell-cushion {
+            color: var(--text-primary);
+            text-decoration: none;
+            padding: 0.4rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .fc-daygrid-day.fc-day-today {
+            background-color: var(--fc-today-bg-color);
+        }
+
+        .fc-event {
+            border-radius: 4px;
+            padding: 2px 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            border-left-width: 3px;
+        }
+
+        .fc-event:hover {
+            filter: brightness(1.1);
+        }
+
+        /* Randomly assign different colors to events */
+        .fc-event:nth-of-type(4n+1) {
+            background-color: var(--event-bg-1);
+            border-color: var(--event-border-1);
+        }
+        
+        .fc-event:nth-of-type(4n+2) {
+            background-color: var(--event-bg-2);
+            border-color: var(--event-border-2);
+        }
+        
+        .fc-event:nth-of-type(4n+3) {
+            background-color: var(--event-bg-3);
+            border-color: var(--event-border-3);
+        }
+        
+        .fc-event:nth-of-type(4n+4) {
+            background-color: var(--event-bg-4);
+            border-color: var(--event-border-4);
+        }
+
+        /* Modal styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+        }
+
+        .modal {
+            background-color: var(--bg-secondary);
+            border-radius: 8px;
+            max-width: 95%;
+            width: 400px;
+            box-shadow: 0 10px 25px var(--shadow-color);
+            transform: translateY(10px);
+            transition: transform 0.2s ease;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent-primary);
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem;
+        }
+
+        .modal-close:hover {
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 1rem;
+        }
+
+        .event-details .detail-row {
+            display: flex;
+            margin-bottom: 0.75rem;
+            align-items: flex-start;
+        }
+
+        .event-details .detail-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .event-details .detail-row i {
+            width: 1rem;
+            height: 1rem;
+            margin-right: 0.5rem;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+            margin-top: 0.2rem;
+        }
+
+        .event-details .detail-row .detail-content {
+            flex-grow: 1;
+        }
+
+        .event-details .detail-label {
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 0.15rem;
+            font-size: 0.8rem;
+        }
+
+        .event-details .detail-value {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header {
+                flex-direction: row;
+                align-items: center;
+                gap: 1rem;
+            }
+            
+            .fc-header-toolbar {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            
+            .fc .fc-toolbar-title {
+                text-align: center;
+                font-size: 1.1rem !important;
+            }
+            
+            .fc .fc-button {
+                padding: 0.4rem 0.75rem;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Theme toggle */
+        .theme-toggle {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.4rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--accent-primary);
+            color: white;
+        }
+
+        /* Dark mode */
+        body.dark-mode {
+            --bg-primary: #000000;
+            --bg-secondary: #111111;
+            --bg-tertiary: #1a1a1a;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --text-tertiary: #71717a;
+            --border-color: #333333;
+            --shadow-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        /* Update notification */
+        .update-status {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            background-color: var(--accent-primary);
+            color: white;
+            font-size: 0.8rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 100;
+            pointer-events: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .update-status.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <i data-lucide="calendar"></i>
+                <span>Calendar</span>
+            </div>
+            <button class="theme-toggle" aria-label="Toggle theme">
+                <i data-lucide="moon"></i>
+            </button>
+        </header>
+        
+        <div class="calendar-container">
+            <div id="calendar"></div>
+        </div>
+    </div>
+    
+    <!-- Event Detail Modal -->
+    <div class="modal-overlay" id="event-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-title">Event Details</h2>
+                <button class="modal-close">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="event-details">
+                    <div class="detail-row">
+                        <i data-lucide="calendar"></i>
+                        <div class="detail-content">
+                            <div class="detail-label">Event</div>
+                            <div class="detail-value" id="event-title">-</div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <i data-lucide="align-left"></i>
+                        <div class="detail-content">
+                            <div class="detail-label">Description</div>
+                            <div class="detail-value" id="event-description">-</div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <i data-lucide="map-pin"></i>
+                        <div class="detail-content">
+                            <div class="detail-label">Location</div>
+                            <div class="detail-value" id="event-location">-</div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <i data-lucide="clock"></i>
+                        <div class="detail-content">
+                            <div class="detail-label">Start</div>
+                            <div class="detail-value" id="event-start">-</div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <i data-lucide="clock"></i>
+                        <div class="detail-content">
+                            <div class="detail-label">End</div>
+                            <div class="detail-value" id="event-end">-</div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <i data-lucide="user"></i>
+                        <div class="detail-content">
+                            <div class="detail-label">Organizer</div>
+                            <div class="detail-value" id="event-organizer">-</div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <i data-lucide="info"></i>
+                        <div class="detail-content">
+                            <div class="detail-label">Status</div>
+                            <div class="detail-value" id="event-status">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Lucide icons
+            lucide.createIcons();
+            
+            // Theme toggling
+            const themeToggle = document.querySelector('.theme-toggle');
+            const themeIcon = themeToggle.querySelector('i');
+            
+            themeToggle.addEventListener('click', () => {
+                document.body.classList.toggle('dark-mode');
+                if (document.body.classList.contains('dark-mode')) {
+                    themeIcon.setAttribute('name', 'sun');
+                    lucide.replace();
+                } else {
+                    themeIcon.setAttribute('name', 'moon');
+                    lucide.replace();
+                }
+                calendar.render(); // Re-render calendar to apply theme
+            });
+
+            // Modal functionality
+            const modal = document.getElementById('event-modal');
+            const closeButton = document.querySelector('.modal-close');
+            
+            function openModal() {
+                modal.style.display = 'flex';
+                setTimeout(() => {
+                    modal.classList.add('active');
+                }, 10);
+            }
+            
+            function closeModal() {
+                modal.classList.remove('active');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300);
+            }
+            
+            closeButton.addEventListener('click', closeModal);
+            
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+            
+            // Escape key closes modal
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && modal.style.display === 'flex') {
+                    closeModal();
+                }
+            });
+
+            // Function to initialize the calendar with events
+            let calendar;
+            let lastEventData = null;
+            let lastSuccessfulPath = null;
+            let pollingInterval = 2000; // Check for updates every 2 seconds
+            let updateStatus = document.createElement('div');
+            
+            // Setup update status indicator
+            updateStatus.className = 'update-status';
+            document.querySelector('.container').appendChild(updateStatus);
+            
+            function initializeCalendar(events) {
+                const calendarEl = document.getElementById('calendar');
+                
+                if (!calendar) {
+                    // First time initialization
+                    calendar = new FullCalendar.Calendar(calendarEl, {
+                        initialView: 'dayGridMonth',
+                        headerToolbar: {
+                            left: 'prev,next today',
+                            center: 'title',
+                            right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+                        },
+                        events: events,
+                        eventClick: function(info) {
+                            showEventDetails(info.event);
+                        },
+                        height: 'auto',
+                        nowIndicator: true,
+                        dayMaxEvents: true,
+                        navLinks: true,
+                        weekNumbers: false,
+                        selectable: false,
+                        dayMaxEventRows: 3,
+                        businessHours: {
+                            daysOfWeek: [1, 2, 3, 4, 5],
+                            startTime: '09:00',
+                            endTime: '17:00',
+                        },
+                        buttonText: {
+                            today: 'Today',
+                            month: 'Month',
+                            week: 'Week',
+                            day: 'Day',
+                            list: 'List'
+                        }
+                    });
+                    calendar.render();
+                } else {
+                    // Update existing calendar
+                    updateCalendarEvents(events);
+                }
+            }
+            
+            // Update calendar events with animation
+            function updateCalendarEvents(newEvents) {
+                // Remove existing events
+                const existingEvents = calendar.getEvents();
+                existingEvents.forEach(event => event.remove());
+                
+                // Add new events with a subtle animation
+                newEvents.forEach((event, index) => {
+                    setTimeout(() => {
+                        calendar.addEvent(event);
+                    }, index * 50); // Stagger the appearance of events
+                });
+                
+                // Show update notification
+                showUpdateNotification('Calendar updated');
+            }
+            
+            // Show a temporary notification that fades out
+            function showUpdateNotification(message) {
+                updateStatus.textContent = message;
+                updateStatus.classList.add('active');
+                
+                setTimeout(() => {
+                    updateStatus.classList.remove('active');
+                }, 2000);
+            }
+
+            // Helper function to generate random colors for events
+            function getEventColorClasses() {
+                const colorSets = [
+                    { bg: 'var(--event-bg-1)', border: 'var(--event-border-1)' },
+                    { bg: 'var(--event-bg-2)', border: 'var(--event-border-2)' },
+                    { bg: 'var(--event-bg-3)', border: 'var(--event-border-3)' },
+                    { bg: 'var(--event-bg-4)', border: 'var(--event-border-4)' }
+                ];
+                
+                return colorSets[Math.floor(Math.random() * colorSets.length)];
+            }
+            
+            // Convert raw JSON data to FullCalendar event objects
+            function formatEvents(data) {
+                return data.map(event => {
+                    const colorSet = getEventColorClasses();
+                    return {
+                        id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 9),
+                        title: event.title,
+                        start: event.start,
+                        end: event.end,
+                        allDay: event.all_day,
+                        backgroundColor: colorSet.bg,
+                        borderColor: colorSet.border,
+                        textColor: 'var(--text-primary)',
+                        extendedProps: {
+                            description: event.description,
+                            location: event.location,
+                            attendees: event.attendees,
+                            categories: event.categories,
+                            status: event.status,
+                            organizer: event.organizer,
+                            source: event.source
+                        }
+                    };
+                });
+            }
+
+            // Check if event data has changed
+            function hasDataChanged(newData) {
+                if (!lastEventData) return true;
+                
+                // Simple check - compare JSON strings
+                return JSON.stringify(newData) !== JSON.stringify(lastEventData);
+            }
+
+            // Try to fetch events from both JSON files with multiple paths
+            function loadEvents(isInitialLoad = false) {
+                // Base filenames for the two event files
+                const fileNames = ['future-events.json', 'shadow-events.json'];
+                
+                // Array to hold all possible paths for both files
+                const pathsArray = fileNames.map(fileName => {
+                    const basePaths = [
+                        fileName,
+                        '/' + fileName,
+                        './' + fileName,
+                        window.location.pathname.replace(/\/[^\/]*$/, '/' + fileName)
+                    ];
+                    return basePaths;
+                });
+                
+                // Fetch function that tries multiple paths for a file
+                function fetchWithFallback(paths) {
+                    const fetchPromises = paths.map(path => 
+                        fetch(path + '?t=' + new Date().getTime()) // Add cache-busting parameter
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error(`HTTP error! Status: ${response.status} for path: ${path}`);
+                                }
+                                return response.json();
+                            })
+                    );
+                    
+                    return Promise.any(fetchPromises);
+                }
+                
+                // Fetch both files
+                Promise.all([
+                    fetchWithFallback(pathsArray[0]).catch(err => {
+                        console.error('Error loading future events:', err);
+                        return []; // Return empty array if fetch fails
+                    }),
+                    fetchWithFallback(pathsArray[1]).catch(err => {
+                        console.error('Error loading shadow events:', err);
+                        return []; // Return empty array if fetch fails
+                    })
+                ])
+                .then(([futureEvents, shadowEvents]) => {
+                    // Combine both event arrays
+                    const combinedData = [...futureEvents, ...shadowEvents];
+                    
+                    if (isInitialLoad || hasDataChanged(combinedData)) {
+                        console.log(isInitialLoad ? 'Initial load' : 'Data changed, updating calendar');
+                        
+                        // Save the new data
+                        lastEventData = combinedData;
+                        
+                        // Format the events for FullCalendar
+                        const events = formatEvents(combinedData);
+                        
+                        // Initialize or update calendar
+                        initializeCalendar(events);
+                        
+                        // Show notification about combined events
+                        if (futureEvents.length > 0 && shadowEvents.length > 0) {
+                            showUpdateNotification(`Loaded ${futureEvents.length} future events and ${shadowEvents.length} shadow events`);
+                        }
+                    } else {
+                        console.log('No changes detected');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading events:', error);
+                    if (isInitialLoad) {
+                        // Only initialize with empty calendar on first load
+                        console.log('Using empty calendar');
+                        initializeCalendar([]);
+                    }
+                });
+            }
+
+            // Initial load of events
+            loadEvents(true);
+            
+            // Set up polling for updates
+            setInterval(() => loadEvents(false), pollingInterval);
+            
+            // Function to show event details in the modal
+            function showEventDetails(event) {
+                document.getElementById('modal-title').textContent = event.title;
+                document.getElementById('event-title').textContent = event.title;
+                document.getElementById('event-description').textContent = event.extendedProps.description || 'No description';
+                document.getElementById('event-location').textContent = event.extendedProps.location || 'No location';
+                document.getElementById('event-start').textContent = formatDateTime(event.start);
+                document.getElementById('event-end').textContent = formatDateTime(event.end);
+                document.getElementById('event-organizer').textContent = event.extendedProps.organizer || 'None';
+                document.getElementById('event-status').textContent = event.extendedProps.status || 'Confirmed';
+                
+                openModal();
+            }
+            
+            // Helper function to format date and time
+            function formatDateTime(date) {
+                if (!date) return 'N/A';
+                
+                const options = {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                };
+                
+                return new Date(date).toLocaleString(undefined, options);
+            }
+        });
+    </script>
+</body>
+</html>
